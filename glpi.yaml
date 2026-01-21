@@ -6,7 +6,7 @@ metadata:
   labels:
     app: glpi
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
     - port: 80
       targetPort: 80
@@ -55,3 +55,4 @@ spec:
                 secretKeyRef:
                   name: mariadb-secret
                   key: mariadb-password
+
