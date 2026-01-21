@@ -1,0 +1,59 @@
+name: Build and Deploy GLPI + MariaDB to AKS
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+      AZURE_AKS_CLUSTER: ${{ vars.AZURE_AKS_CLUSTER }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: ACR login
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ vars.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push GLPI image
+        run: |
+          docker build -t $ACR_LOGIN_SERVER/glpi:latest .
+          docker push $ACR_LOGIN_SERVER/glpi:latest
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group $AZURE_RESOURCE_GROUP \
+            --name $AZURE_AKS_CLUSTER \
+            --overwrite-existing
+
+      # Optional: Secret stage (skip if you manage DB secrets manually)
+      - name: Create DB secrets
+        run: |
+          kubectl delete secret mariadb-secret --ignore-not-found
+          kubectl create secret generic mariadb-secret \
+            --from-literal=root-password='${{ secrets.DB_ROOT_PASSWORD }}' \
+            --from-literal=user-password='${{ secrets.DB_USER_PASSWORD }}'
+
+      - name: Deploy MariaDB
+        run: kubectl apply -f mariadb.yaml
+
+      - name: Deploy GLPI
+        run: kubectl apply -f glpi.yaml
