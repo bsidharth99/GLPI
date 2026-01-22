@@ -1,5 +1,5 @@
 image:
-  repository: myacrregistry.azurecr.io/glpi
+  repository: serviceone1.azurecr.io/glpi
   tag: latest
   pullPolicy: IfNotPresent
 
