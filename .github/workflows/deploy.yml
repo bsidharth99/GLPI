@@ -1,8 +1,8 @@
-name: Build and Deploy GLPI + MariaDB to AKS
+name: Build and Deploy GLPI + MariaDB to AKS (Helm)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "Ingress_helm" ]
 
 jobs:
   build-and-deploy:
@@ -12,6 +12,8 @@ jobs:
       ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
       AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
       AZURE_AKS_CLUSTER: ${{ vars.AZURE_AKS_CLUSTER }}
+      HELM_RELEASE: glpi
+      HELM_NAMESPACE: glpi
 
     steps:
       - name: Checkout
@@ -31,11 +33,14 @@ jobs:
 
       - name: Build and push GLPI image
         run: |
-          docker build -t $ACR_LOGIN_SERVER/glpi:latest .
-          docker push $ACR_LOGIN_SERVER/glpi:latest
+          docker build -t $ACR_LOGIN_SERVER/glpi:${{ github.sha }} .
+          docker push $ACR_LOGIN_SERVER/glpi:${{ github.sha }}
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
 
       - name: Get AKS credentials
         run: |
@@ -44,16 +49,11 @@ jobs:
             --name $AZURE_AKS_CLUSTER \
             --overwrite-existing
 
-      # Optional: Secret stage (skip if you manage DB secrets manually)
-      - name: Create DB secrets
+      - name: Deploy with Helm
         run: |
-          kubectl delete secret mariadb-secret --ignore-not-found
-          kubectl create secret generic mariadb-secret \
-            --from-literal=root-password='${{ secrets.DB_ROOT_PASSWORD }}' \
-            --from-literal=user-password='${{ secrets.DB_USER_PASSWORD }}'
-
-      - name: Deploy MariaDB
-        run: kubectl apply -f mariadb.yaml
-
-      - name: Deploy GLPI
-        run: kubectl apply -f glpi.yaml
+          helm upgrade --install $HELM_RELEASE ./glpi-chart \
+            --namespace $HELM_NAMESPACE --create-namespace \
+            --set image.repository=$ACR_LOGIN_SERVER/glpi \
+            --set image.tag=${{ github.sha }} \
+            --set mariadb.rootPassword=${{ secrets.DB_ROOT_PASSWORD }} \
+            --set mariadb.userPassword=${{ secrets.DB_USER_PASSWORD }}
