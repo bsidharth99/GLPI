@@ -51,7 +51,7 @@ jobs:
 
       - name: Deploy with Helm
         run: |
-          helm upgrade --install $HELM_RELEASE .//helm-charts/glpi \
+          helm upgrade --install $HELM_RELEASE ./helm-charts/glpi \
             --namespace $HELM_NAMESPACE --create-namespace \
             --set image.repository=$ACR_LOGIN_SERVER/glpi \
             --set image.tag=${{ github.sha }} \
