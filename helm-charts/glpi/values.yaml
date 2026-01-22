@@ -1,1 +1,18 @@
+# Global values
+image:
+  repository: myacrregistry.azurecr.io/glpi
+  tag: latest
+  pullPolicy: IfNotPresent
+
+mariadb:
+  image: mariadb
+  tag: 11.0
+  rootPassword: changeme-root
+  user: glpiuser
+  userPassword: changeme-user
+  database: glpidb
+
+service:
+  type: LoadBalancer
+  port: 80
 
