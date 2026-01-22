@@ -1,37 +1,46 @@
-# Base image: Apache + PHP
+# GLPI on Apache + PHP 8.2, no bundled demo/data
 FROM php:8.2-apache
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libpng-dev libjpeg-dev libwebp-dev libzip-dev libldap2-dev libicu-dev \
-    mariadb-client unzip curl git \
-    && rm -rf /var/lib/apt/lists/*
+# Versions
+ARG GLPI_VERSION=10.0.13
 
 # Enable Apache modules
-RUN a2enmod rewrite
+RUN a2enmod rewrite headers
 
-# Configure PHP extensions required by GLPI
-RUN docker-php-ext-configure gd --with-jpeg --with-webp \
- && docker-php-ext-install gd mysqli intl zip ldap
+# System deps
+RUN apt-get update && apt-get install -y \
+    libldap2-dev libicu-dev libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
+    libxml2-dev libonig-dev libpq-dev libmariadb-dev-compat libmariadb-dev \
+    unzip git curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+# PHP extensions required by GLPI
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install -j$(nproc) \
+      gd intl zip opcache mysqli pdo pdo_mysql xml mbstring ldap && \
+    docker-php-ext-enable opcache
+
+# Tune PHP for production-ish defaults
+COPY php.ini /usr/local/etc/php/conf.d/glpi.ini
+
+# Download GLPI (vanilla, no data)
 WORKDIR /var/www/html
+RUN curl -fsSL -o glpi.tgz https://github.com/glpi-project/glpi/releases/download/${GLPI_VERSION}/glpi-${GLPI_VERSION}.tgz && \
+    tar -xzf glpi.tgz && rm glpi.tgz && \
+    mv glpi/* . && rmdir glpi
 
-# Download latest GLPI release (adjust version if needed)
-# Check https://github.com/glpi-project/glpi/releases for the newest version
-ENV GLPI_VERSION=10.0.12
-RUN curl -L https://github.com/glpi-project/glpi/releases/download/${GLPI_VERSION}/glpi-${GLPI_VERSION}.tgz -o glpi.tgz \
- && tar xzf glpi.tgz --strip-components=1 \
- && rm glpi.tgz \
- && chown -R www-data:www-data /var/www/html
+# Permissions (Apache user: www-data)
+RUN chown -R www-data:www-data /var/www/html && \
+    find /var/www/html -type d -exec chmod 755 {} \; && \
+    find /var/www/html -type f -exec chmod 644 {} \;
 
-# Configure Apache document root
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
- && sed -ri 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
+# Healthcheck: simple PHP file existence
+HEALTHCHECK --interval=30s --timeout=10s --retries=5 \
+  CMD [ -f /var/www/html/index.php ] || exit 1
 
-# Expose HTTP port
+# Expose HTTP
 EXPOSE 80
 
 # Default command
 CMD ["apache2-foreground"]
+
