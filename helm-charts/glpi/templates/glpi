@@ -1,9 +1,112 @@
+# Secret for MariaDB
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mariadb-secret
+  namespace: glpi
+type: Opaque
+stringData:
+  mariadb-root-password: {{ .Values.mariadb.rootPassword }}
+  mariadb-user: {{ .Values.mariadb.user }}
+  mariadb-password: {{ .Values.mariadb.userPassword }}
+  mariadb-database: {{ .Values.mariadb.database }}
+---
+# MariaDB Service (headless for StatefulSet)
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: glpi
+  labels:
+    app: mariadb
+spec:
+  clusterIP: None
+  ports:
+    - port: 3306
+      name: mysql
+  selector:
+    app: mariadb
+---
+# MariaDB StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+  namespace: glpi
+spec:
+  serviceName: mariadb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+        - name: mariadb
+          image: "{{ .Values.mariadb.image }}:{{ .Values.mariadb.tag }}"
+          ports:
+            - containerPort: 3306
+              name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-secret
+                  key: mariadb-root-password
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-secret
+                  key: mariadb-database
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-secret
+                  key: mariadb-user
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-secret
+                  key: mariadb-password
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
+        storageClassName: {{ .Values.persistence.storageClass }}
+---
+# GLPI Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: glpi
+  namespace: glpi
+  labels:
+    app: glpi
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 80
+      name: http
+  selector:
+    app: glpi
+---
+# GLPI Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: glpi
-  labels:
-    app: glpi
+  namespace: glpi
 spec:
   replicas: 1
   selector:
@@ -20,29 +123,24 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 80
+              name: http
           env:
-            - name: GLPI_DB_HOST
-              value: mariadb
-            - name: GLPI_DB_NAME
-              value: "{{ .Values.mariadb.database }}"
-            - name: GLPI_DB_USER
-              value: "{{ .Values.mariadb.user }}"
-            - name: GLPI_DB_PASSWORD
+            - name: MARIADB_HOST
+              value: mariadb.glpi.svc.cluster.local
+            - name: MARIADB_PORT
+              value: "3306"
+            - name: MARIADB_DATABASE
               valueFrom:
                 secretKeyRef:
                   name: mariadb-secret
-                  key: user-password
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: glpi
-  labels:
-    app: glpi
-spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: 80
-  selector:
-    app: glpi
+                  key: mariadb-database
+            - name: MARIADB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-secret
+                  key: mariadb-user
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-secret
+                  key: mariadb-password
