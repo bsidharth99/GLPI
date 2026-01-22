@@ -6,9 +6,9 @@ image:
 mariadb:
   image: mariadb
   tag: 11.0
-  rootPassword: rootpass
+  rootPassword: pass
   user: glpiuser
-  userPassword: SuperSecretPassword
+  userPassword: pass
   database: glpidb
 
 service:
