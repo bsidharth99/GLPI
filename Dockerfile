@@ -18,22 +18,19 @@ RUN docker-php-ext-configure gd --with-jpeg --with-webp \
 WORKDIR /var/www/html
 
 # Download latest GLPI release (adjust version if needed)
-# Check https://github.com/glpi-project/glpi/releases for the newest version
 ENV GLPI_VERSION=10.0.12
 RUN curl -L https://github.com/glpi-project/glpi/releases/download/${GLPI_VERSION}/glpi-${GLPI_VERSION}.tgz -o glpi.tgz \
  && tar xzf glpi.tgz --strip-components=1 \
  && rm glpi.tgz \
  && chown -R www-data:www-data /var/www/html
 
-# Configure Apache document root
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
- && sed -ri 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
+# Configure Apache document root to /var/www/html
+ENV APACHE_DOCUMENT_ROOT=/var/www/html
+RUN sed -ri "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/*.conf \
+ && sed -ri "s!/var/www/!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/apache2.conf
 
 # Expose HTTP port
 EXPOSE 80
 
 # Default command
 CMD ["apache2-foreground"]
-
-
