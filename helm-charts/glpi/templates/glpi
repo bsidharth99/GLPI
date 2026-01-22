@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: glpi
+  labels:
+    app: glpi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: glpi
+  template:
+    metadata:
+      labels:
+        app: glpi
+    spec:
+      containers:
+        - name: glpi
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+          env:
+            - name: GLPI_DB_HOST
+              value: mariadb
+            - name: GLPI_DB_NAME
+              value: "{{ .Values.mariadb.database }}"
+            - name: GLPI_DB_USER
+              value: "{{ .Values.mariadb.user }}"
+            - name: GLPI_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-secret
+                  key: user-password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: glpi
+  labels:
+    app: glpi
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 80
+  selector:
+    app: glpi
