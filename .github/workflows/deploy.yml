@@ -50,5 +50,5 @@ jobs:
             --overwrite-existing
       - name: Deploy with Helm
         run: >
-         helm upgrade --install $HELM_RELEASE ./helm-charts/glpi --namespace $HELM_NAMESPACE --create-namespace -f ./helm-charts/glpi/values.yaml --set mariadb.rootPassword=${{ secrets.DB_ROOT_PASSWORD }} --set mariadb.userPassword=${{ secrets.DB_USER_PASSWORD }}
+         helm upgrade --install $HELM_RELEASE ./helm-charts/glpi --namespace $HELM_NAMESPACE --create-namespace -f ./helm-charts/glpi/values.yaml 
 
