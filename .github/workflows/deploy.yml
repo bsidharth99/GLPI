@@ -48,7 +48,6 @@ jobs:
             --resource-group $AZURE_RESOURCE_GROUP \
             --name $AZURE_AKS_CLUSTER \
             --overwrite-existing
-
       - name: Deploy with Helm
-        run: helm upgrade --install $HELM_RELEASE ./helm-charts/glpi --namespace $HELM_NAMESPACE --create-namespace --set image.repository=$ACR_LOGIN_SERVER/glpi --set image.tag=latest --set mariadb.rootPassword=${{ secrets.DB_ROOT_PASSWORD }} --set mariadb.userPassword=${{ secrets.DB_USER_PASSWORD }}
+        run: helm upgrade --install $HELM_RELEASE ./helm-charts/glpi --namespace $HELM_NAMESPACE --create-namespace -f ./helm-charts/glpi/values.yaml --set mariadb.rootPassword=${{ secrets.DB_ROOT_PASSWORD }} --set mariadb.userPassword=${{ secrets.DB_USER_PASSWORD }}
 
