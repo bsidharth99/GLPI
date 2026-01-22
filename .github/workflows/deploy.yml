@@ -2,7 +2,7 @@ name: Build and Deploy GLPI + MariaDB to AKS (Helm)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "Ingress_helm" ]
 
 jobs:
   build-and-deploy:
