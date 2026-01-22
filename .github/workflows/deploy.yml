@@ -49,6 +49,14 @@ jobs:
             --name $AZURE_AKS_CLUSTER \
             --overwrite-existing
       - name: Deploy with Helm
-        run: >
-         helm upgrade --install $HELM_RELEASE ./helm-charts/glpi --namespace $HELM_NAMESPACE --create-namespace -f ./helm-charts/glpi/values.yaml 
+       env:
+        DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
+        DB_USER_PASSWORD: ${{ secrets.DB_USER_PASSWORD }}
+       run: |
+        helm upgrade --install "$HELM_RELEASE" ./helm-charts/glpi \
+        --namespace "$HELM_NAMESPACE" \
+        --create-namespace \
+        -f ./helm-charts/glpi/values.yaml \
+        --set mariadb.rootPassword="$DB_ROOT_PASSWORD" \
+        --set mariadb.userPassword="$DB_USER_PASSWORD"
 
