@@ -5,16 +5,13 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-deploy: 
+  # -------------------------
+  # Stage 1: Build & Push Image
+  # -------------------------
+  build:
     runs-on: ubuntu-latest
-
     env:
       ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
-      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-      AZURE_AKS_CLUSTER: ${{ vars.AZURE_AKS_CLUSTER }}
-      HELM_RELEASE: glpi
-      HELM_NAMESPACE: glpi
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,6 +33,21 @@ jobs:
           docker build -t $ACR_LOGIN_SERVER/glpi:latest .
           docker push $ACR_LOGIN_SERVER/glpi:latest
 
+  # -------------------------
+  # Stage 2: Configure Cluster
+  # -------------------------
+  configure-cluster:
+    runs-on: ubuntu-latest
+    needs: build
+    env:
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+      AZURE_AKS_CLUSTER: ${{ vars.AZURE_AKS_CLUSTER }}
+    steps:
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
 
@@ -48,15 +60,48 @@ jobs:
             --resource-group $AZURE_RESOURCE_GROUP \
             --name $AZURE_AKS_CLUSTER \
             --overwrite-existing
-      - name: Deploy with Helm
-       env:
-        DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
-        DB_USER_PASSWORD: ${{ secrets.DB_USER_PASSWORD }}
-       run: |
-        helm upgrade --install "$HELM_RELEASE" ./helm-charts/glpi \
-        --namespace "$HELM_NAMESPACE" \
-        --create-namespace \
-        -f ./helm-charts/glpi/values.yaml \
-        --set mariadb.rootPassword="$DB_ROOT_PASSWORD" \
-        --set mariadb.userPassword="$DB_USER_PASSWORD"
 
+  # -------------------------
+  # Stage 3: Deploy with Helm
+  # -------------------------
+  deploy:
+    runs-on: ubuntu-latest
+    needs: configure-cluster
+    env:
+      HELM_RELEASE: glpi
+      HELM_NAMESPACE: glpi
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+      AZURE_AKS_CLUSTER: ${{ vars.AZURE_AKS_CLUSTER }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group $AZURE_RESOURCE_GROUP \
+            --name $AZURE_AKS_CLUSTER \
+            --overwrite-existing
+
+      - name: Deploy with Helm
+        env:
+          DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
+          DB_USER_PASSWORD: ${{ secrets.DB_USER_PASSWORD }}
+        run: |
+          helm upgrade --install "$HELM_RELEASE" ./helm-charts/glpi \
+            --namespace "$HELM_NAMESPACE" \
+            --create-namespace \
+            -f ./helm-charts/glpi/values.yaml \
+            --set mariadb.rootPassword="$DB_ROOT_PASSWORD" \
+            --set mariadb.userPassword="$DB_USER_PASSWORD"
