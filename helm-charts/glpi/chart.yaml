@@ -1,6 +1,0 @@
-apiVersion: v2
-name: glpi-chart
-description: Helm chart for GLPI + MariaDB
-version: 0.1.0
-appVersion: "10.0.12"
-
