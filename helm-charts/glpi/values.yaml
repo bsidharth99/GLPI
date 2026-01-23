@@ -12,7 +12,7 @@ mariadb:
   database: glpidb
 
 service:
-  type: LoadBalancer
+  type: ClusterIp
   port: 80
 
 persistence:
