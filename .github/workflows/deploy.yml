@@ -1,8 +1,7 @@
 name: Build and Deploy GLPI + MariaDB to AKS (Helm)
 
-on:
-  push:
-    branches: [ "main" ]
+on: 
+ workflow_dispatch:
 
 jobs:
   # -------------------------
