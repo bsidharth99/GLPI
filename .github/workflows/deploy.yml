@@ -8,7 +8,7 @@ jobs:
   # -------------------------
   # Stage 2: Configure Cluster
   # -------------------------
-   configure-cluster:
+configure-cluster:
     runs-on: ubuntu-latest
     needs: build
     env:
