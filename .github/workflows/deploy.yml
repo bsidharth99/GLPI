@@ -1,7 +1,8 @@
 name: Build and Deploy GLPI + MariaDB to AKS (Helm + Traefik + cert-manager)
 
-on: 
- workflow_dispatch:
+on:
+  push:
+    branches: [ "main" ]
 
 jobs:
   # -------------------------
