@@ -88,6 +88,8 @@ jobs:
 
       - name: Install Helm
         uses: azure/setup-helm@v3
+        with:
+          version: v3.14.0
 
       - name: Get AKS credentials
         run: |
