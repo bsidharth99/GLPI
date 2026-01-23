@@ -50,10 +50,11 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
 
-      - name: Install Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: v3.14.0
+      - name: Install Helm manually
+        run: |
+           curl -sSL https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz | tar xz
+           sudo mv linux-amd64/helm /usr/local/bin/helm
+
 
 
       - name: Get AKS credentials
@@ -86,10 +87,10 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
 
-      - name: Install Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: v3.14.0
+      - name: Install Helm manually
+        run: |
+           curl -sSL https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz | tar xz
+           sudo mv linux-amd64/helm /usr/local/bin/helm
 
       - name: Get AKS credentials
         run: |
