@@ -30,7 +30,7 @@ jobs:
 
       - name: Build and push GLPI image
         run: |
-          docker build -t $ACR_LOGIN_SERVER/glpi:latest .
+          docker build -t $ACR_LOGIN_SERVER/glpi:latest -f glpi/dockerfile .
           docker push $ACR_LOGIN_SERVER/glpi:latest
 
   # -------------------------
