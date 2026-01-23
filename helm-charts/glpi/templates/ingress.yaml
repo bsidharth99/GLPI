@@ -9,10 +9,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - naveenkumarsakthivel.online   # replace with your domain
+        - glpi.naveenkumarsakthivel.online   # replace with your domain
       secretName: glpi-tls
   rules:
-    - host: naveenkumarsakthivel.online 
+    - host: glpi.naveenkumarsakthivel.online
       http:
         paths:
           - path: /
