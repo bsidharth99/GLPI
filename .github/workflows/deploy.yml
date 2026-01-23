@@ -5,20 +5,13 @@ on:
 
 jobs:
   # -------------------------
-  # Stage 1: Build & Push Image
-  # -------------------------
-  build:
-    runs-on: ubuntu-latest
-    env:
-      ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
-
-  # -------------------------
   # Stage 2: Configure Cluster
   # -------------------------
-  configure-cluster:
+   configure-cluster:
     runs-on: ubuntu-latest
     needs: build
     env:
+      ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
       AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
       AZURE_AKS_CLUSTER: ${{ vars.AZURE_AKS_CLUSTER }}
     steps:
