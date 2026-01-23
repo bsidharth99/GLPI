@@ -38,6 +38,7 @@ jobs:
   # -------------------------
   configure-cluster:
      runs-on: ubuntu-latest
+     needs: build
      env:
       ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
       AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
