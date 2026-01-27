@@ -63,6 +63,9 @@ jobs:
             --name $AZURE_AKS_CLUSTER \
             --overwrite-existing
 
+      - name: Verify cluster connection
+        run: kubectl get nodes
+
   # -------------------------
   # Stage 3: Deploy with Helm
   # -------------------------
