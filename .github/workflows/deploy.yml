@@ -37,13 +37,12 @@ jobs:
   # Stage 2: Configure Cluster
   # -------------------------
   configure-cluster:
-     runs-on: ubuntu-latest
-     needs: build
-     env:
-      ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+    runs-on: ubuntu-latest
+    needs: build
+    env:
       AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
       AZURE_AKS_CLUSTER: ${{ vars.AZURE_AKS_CLUSTER }}
-     steps:
+    steps:
       - name: Azure login
         uses: azure/login@v1
         with:
@@ -52,12 +51,10 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
 
-      - name: Install Helm manually
+      - name: Install Helm
         run: |
-           curl -sSL https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz | tar xz
-           sudo mv linux-amd64/helm /usr/local/bin/helm
-
-
+          curl -sSL https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz | tar xz
+          sudo mv linux-amd64/helm /usr/local/bin/helm
 
       - name: Get AKS credentials
         run: |
@@ -75,31 +72,9 @@ jobs:
     env:
       HELM_RELEASE: glpi
       HELM_NAMESPACE: glpi
-      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-      AZURE_AKS_CLUSTER: ${{ vars.AZURE_AKS_CLUSTER }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Azure login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-
-      - name: Install Helm manually
-        run: |
-           curl -sSL https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz | tar xz
-           sudo mv linux-amd64/helm /usr/local/bin/helm
-
-      - name: Get AKS credentials
-        run: |
-          az aks get-credentials \
-            --resource-group $AZURE_RESOURCE_GROUP \
-            --name $AZURE_AKS_CLUSTER \
-            --overwrite-existing
 
       # --- Install Traefik ---
       - name: Install Traefik Ingress Controller
