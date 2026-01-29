@@ -10,12 +10,12 @@ spec:
   selector:
     matchLabels:
       app: mariadb
+  persistentVolumeClaimRetentionPolicy: 
+    whenDeleted: Retain
   template:
     metadata:
       labels:
         app: mariadb
-  persistentVolumeClaimRetentionPolicy: 
-    whenDeleted: Retain
     spec:
       containers:
         - name: mariadb
