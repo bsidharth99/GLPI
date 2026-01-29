@@ -1,0 +1,15 @@
+# MariaDB Service (headless for StatefulSet)
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: glpi
+  labels:
+    app: mariadb
+spec:
+  clusterIP: None
+  ports:
+    - port: 3306
+      name: mysql
+  selector:
+    app: mariadb
