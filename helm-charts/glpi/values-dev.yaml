@@ -5,7 +5,7 @@ image:
 
 mariadb:
   image: mariadb
-  tag: 11.0
+  tag: 11.0.3
   rootPassword: pass
   user: glpiuser
   userPassword: pass
