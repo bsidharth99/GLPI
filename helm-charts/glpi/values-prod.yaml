@@ -20,7 +20,8 @@ persistence:
   enabled: true
   size: 10Gi          # production storage size
   storageClass: default
-
+  reclaimPolicy: Retain
+  
 ingress:
   enabled: true
   className: traefik
