@@ -1,9 +1,8 @@
-# MariaDB Service (headless for StatefulSet)
 apiVersion: v1
 kind: Service
 metadata:
   name: mariadb
-  namespace: glpi
+  namespace: {{ .Release.Namespace }}
   labels:
     app: mariadb
 spec:
