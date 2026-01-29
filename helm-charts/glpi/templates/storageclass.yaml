@@ -1,0 +1,9 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.persistence.storageClass }}
+provisioner: disk.csi.azure.com   # Example for Azure; change to your environment
+parameters:
+  skuName: Standard_LRS           # Example parameter for Azure Disk
+reclaimPolicy: Retain             # Ensures PVs are not deleted when PVCs are removed
+volumeBindingMode: WaitForFirstConsumer
