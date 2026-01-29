@@ -19,3 +19,12 @@ persistence:
   enabled: true
   size: 5Gi
   storageClass: default
+
+ingress:
+  enabled: true
+  className: traefik
+  host: glpi.naveenkumarsakthivel.online   # replace with your domain
+  tls:
+    enabled: true
+    secretName: glpi-tls
+    clusterIssuer: letsencrypt-prod
