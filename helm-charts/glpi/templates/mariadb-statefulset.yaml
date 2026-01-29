@@ -1,16 +1,15 @@
-# MariaDB StatefulSet
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mariadb
-  namespace: glpi
+  namespace: {{ .Release.Namespace }}
 spec:
   serviceName: mariadb
   replicas: 1
   selector:
     matchLabels:
       app: mariadb
-  persistentVolumeClaimRetentionPolicy: 
+  persistentVolumeClaimRetentionPolicy:
     whenDeleted: Retain
   template:
     metadata:
