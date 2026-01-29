@@ -1,9 +1,8 @@
-# GLPI Service
 apiVersion: v1
 kind: Service
 metadata:
   name: glpi
-  namespace: glpi
+  namespace: {{ .Release.Namespace }}
   labels:
     app: glpi
 spec:
@@ -11,6 +10,7 @@ spec:
   ports:
     - port: {{ .Values.service.port }}
       targetPort: 80
+      protocol: TCP
       name: http
   selector:
     app: glpi
