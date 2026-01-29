@@ -5,5 +5,5 @@ metadata:
 provisioner: disk.csi.azure.com   # Example for Azure; change to your environment
 parameters:
   skuName: Standard_LRS           # Example parameter for Azure Disk
-reclaimPolicy: Retain             # Ensures PVs are not deleted when PVCs are removed
+reclaimPolicy: {{ .Values.persistence.reclaimPolicy }}             # Ensures PVs are not deleted when PVCs are removed
 volumeBindingMode: WaitForFirstConsumer
