@@ -1,8 +1,10 @@
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: glpi
-  namespace: {{ .Release.Namespace }}
+  namespace:
+    "{ .Release.Namespace }": null
 spec:
   serviceName: glpi
   replicas: 1
@@ -19,7 +21,8 @@ spec:
       containers:
         - name: glpi
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy:
+            "{ .Values.image.pullPolicy }": null
           ports:
             - containerPort: 80
               name: http
@@ -43,15 +46,27 @@ spec:
                 secretKeyRef:
                   name: mariadb-secret
                   key: mariadb-password
-          volumeMounts:
-            - name: glpi-data
-              mountPath: /var/www/html/files
-  volumeClaimTemplates:
-    - metadata:
-        name: glpi-data
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: {{ .Values.persistence.size }}
-        storageClassName: {{ .Values.persistence.storageClass }}
+  volumeMounts:
+    - name: glpi-files
+      mountPath: /var/www/html/glpi/files
+    - name: glpi-config
+      mountPath: /var/www/html/glpi/config
+volumeClaimTemplates:
+  - metadata:
+      name: glpi-files
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: glpi-retain
+  - metadata:
+      name: glpi-config
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: glpi-retain
