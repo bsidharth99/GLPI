@@ -63,8 +63,8 @@ jobs:
       - name: Get AKS credentials
         run: |
           az aks get-credentials \
-            --resource-group "$AZURE_RESOURCE_GROUP" \
-            --name "$AZURE_AKS_CLUSTER" \
+            --resource-group $AZURE_RESOURCE_GROUP \
+            --name $AZURE_AKS_CLUSTER \
             --overwrite-existing
 
       - name: Verify cluster connection
