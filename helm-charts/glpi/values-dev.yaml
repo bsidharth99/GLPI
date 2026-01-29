@@ -18,7 +18,7 @@ service:
 persistence:
   enabled: true
   size: 5Gi
-  storageClass: default
+  storageClass: glpi-retain
   reclaimPolicy: Retain
   
 ingress:
