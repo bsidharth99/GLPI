@@ -1,9 +1,8 @@
-# GLPI StatefulSet
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: glpi
-  namespace: glpi
+  namespace: {{ .Release.Namespace }}
 spec:
   serviceName: glpi
   replicas: 1
@@ -26,7 +25,7 @@ spec:
               name: http
           env:
             - name: MARIADB_HOST
-              value: mariadb.glpi.svc.cluster.local
+              value: mariadb.{{ .Release.Namespace }}.svc.cluster.local
             - name: MARIADB_PORT
               value: "3306"
             - name: MARIADB_DATABASE
@@ -46,7 +45,7 @@ spec:
                   key: mariadb-password
           volumeMounts:
             - name: glpi-data
-              mountPath: /var/www/html
+              mountPath: /var/www/html/files
   volumeClaimTemplates:
     - metadata:
         name: glpi-data
