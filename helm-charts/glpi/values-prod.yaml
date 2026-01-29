@@ -1,0 +1,31 @@
+image:
+  repository: serviceone1.azurecr.io/glpi
+  tag: latest
+  pullPolicy: IfNotPresent
+
+mariadb:
+  image: mariadb
+  tag: 11.0.3   # pin to a stable release
+  # ⚠️ Override these securely at install time or keep in a private values file
+  rootPassword: CHANGEME_ROOT
+  user: glpiuser
+  userPassword: CHANGEME_USER
+  database: glpidb
+
+service:
+  type: ClusterIP
+  port: 80
+
+persistence:
+  enabled: true
+  size: 10Gi          # production storage size
+  storageClass: default
+
+ingress:
+  enabled: true
+  className: traefik
+  host: glpi-prd.naveenkumarsakthivel.online   # production hostname
+  tls:
+    enabled: true
+    secretName: glpi-tls
+    clusterIssuer: letsencrypt-prod
