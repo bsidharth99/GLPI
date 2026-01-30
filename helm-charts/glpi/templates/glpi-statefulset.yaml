@@ -69,8 +69,6 @@ spec:
           mountPath: /var/glpi/config
         - name: glpi-marketplace
           mountPath: /var/glpi/marketplace
-        - name: glpi-logs
-          mountPath: /var/glpi/logs
   volumeClaimTemplates:
   - metadata:
       name: glpi-files
@@ -90,14 +88,6 @@ spec:
       storageClassName: glpi-retain
   - metadata:
       name: glpi-marketplace
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 1Gi
-      storageClassName: glpi-retain
-  - metadata:
-      name: glpi-logs
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
