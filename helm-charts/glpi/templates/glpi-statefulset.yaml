@@ -25,12 +25,16 @@ spec:
         image: busybox
         securityContext:
           runAsUser: 0       # run initContainer as root
-        command: ["sh", "-c", "chown -R 33:33 /var/glpi/files /var/glpi/config"]
+        command: ["sh", "-c", "chown -R 33:33 /var/glpi/files /var/glpi/config /var/glpi/marketplace /var/glpi/logs"]
         volumeMounts:
         - name: glpi-files
           mountPath: /var/glpi/files
         - name: glpi-config
           mountPath: /var/glpi/config
+        - name: glpi-marketplace
+          mountPath: /var/glpi/marketplace
+        - name: glpi-logs
+          mountPath: /var/glpi/logs
       containers:
       - name: glpi
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -63,21 +67,39 @@ spec:
           mountPath: /var/glpi/files
         - name: glpi-config
           mountPath: /var/glpi/config
+        - name: glpi-marketplace
+          mountPath: /var/glpi/marketplace
+        - name: glpi-logs
+          mountPath: /var/glpi/logs
   volumeClaimTemplates:
   - metadata:
       name: glpi-files
     spec:
-      accessModes:
-      - ReadWriteOnce
+      accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 5Gi
+          storage: 2Gi
       storageClassName: glpi-retain
   - metadata:
       name: glpi-config
     spec:
-      accessModes:
-      - ReadWriteOnce
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: glpi-retain
+  - metadata:
+      name: glpi-marketplace
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: glpi-retain
+  - metadata:
+      name: glpi-logs
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
           storage: 1Gi
