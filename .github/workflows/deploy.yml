@@ -47,6 +47,7 @@ jobs:
       AZURE_AKS_CLUSTER: ${{ vars.AZURE_AKS_CLUSTER }}
       HELM_RELEASE: glpi
       HELM_NAMESPACE: serviceone-dev
+      ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
     steps:
       - name: Azure login
         uses: azure/login@v1
