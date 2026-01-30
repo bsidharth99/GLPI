@@ -45,9 +45,9 @@ spec:
                   key: mariadb-password
           volumeMounts:
             - name: glpi-files
-              mountPath: /var/www/html/glpi/files
+              mountPath: /var/glpi/files
             - name: glpi-config
-              mountPath: /var/www/html/glpi/config
+              mountPath: /var/glpi/config
   volumeClaimTemplates:
     - metadata:
         name: glpi-files
