@@ -1,7 +1,11 @@
+# Start from the official GLPI image
 FROM glpi/glpi:latest
 
-# Reset to root
+# Switch back to root (the official image sets USER www-data)
 USER root
 
-# Skip the image's entrypoint and run supervisord directly
+# Disable the bundled entrypoint script
+ENTRYPOINT []
+
+# Run supervisord directly as root
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
