@@ -21,56 +21,56 @@ spec:
         runAsGroup: 0 
         fsGroup: 33
       containers:
-        - name: glpi
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
-          ports:
-            - containerPort: 80
-              name: http
-          env:
-            - name: MARIADB_HOST
-              value: mariadb.{{ .Release.Namespace }}.svc.cluster.local
-            - name: MARIADB_PORT
-              value: "3306"
-            - name: MARIADB_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: mariadb-secret
-                  key: mariadb-database
-            - name: MARIADB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: mariadb-secret
-                  key: mariadb-user
-            - name: MARIADB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mariadb-secret
-                  key: mariadb-password
-          volumeMounts:
-            - name: glpi-files
-              mountPath: /var/glpi/files
-            - name: glpi-config
-              mountPath: /var/glpi/config
-            # Override image's CMD/USER so supervisord runs as root
-            command: ["/usr/bin/supervisord"]
-            args: ["-c", "/etc/supervisor/conf.d/supervisord.conf"]
+      - name: glpi
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+        ports:
+        - containerPort: 80
+          name: http
+        env:
+        - name: MARIADB_HOST
+          value: mariadb.{{ .Release.Namespace }}.svc.cluster.local
+        - name: MARIADB_PORT
+          value: "3306"
+        - name: MARIADB_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-secret
+              key: mariadb-database
+        - name: MARIADB_USER
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-secret
+              key: mariadb-user
+        - name: MARIADB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-secret
+              key: mariadb-password
+        volumeMounts:
+        - name: glpi-files
+          mountPath: /var/glpi/files
+        - name: glpi-config
+          mountPath: /var/glpi/config
+        # Override image's CMD/USER so supervisord runs as root
+        command: ["/usr/bin/supervisord"]
+        args: ["-c", "/etc/supervisor/conf.d/supervisord.conf"]
   volumeClaimTemplates:
-    - metadata:
-        name: glpi-files
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 5Gi
-        storageClassName: glpi-retain
-    - metadata:
-        name: glpi-config
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
-        storageClassName: glpi-retain
+  - metadata:
+      name: glpi-files
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: glpi-retain
+  - metadata:
+      name: glpi-config
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: glpi-retain
