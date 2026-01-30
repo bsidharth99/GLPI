@@ -17,12 +17,14 @@ spec:
         app: glpi
     spec:
       securityContext:
-        runAsUser: 33        # run as www-data
+        runAsUser: 33        # main container runs as www-data
         runAsGroup: 33
         fsGroup: 33
       initContainers:
       - name: fix-perms
         image: busybox
+        securityContext:
+          runAsUser: 0       # run initContainer as root
         command: ["sh", "-c", "chown -R 33:33 /var/glpi/files /var/glpi/config"]
         volumeMounts:
         - name: glpi-files
