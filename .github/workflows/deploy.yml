@@ -26,11 +26,14 @@ jobs:
           login-server: ${{ vars.ACR_LOGIN_SERVER }}
           username: ${{ vars.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
-
+          
       - name: Build and push GLPI image
+        env:
+         BUILD_NUMBER: ${{ github.run_number }}
         run: |
-          docker build -t $ACR_LOGIN_SERVER/glpi:latest -f glpi/Dockerfile ./glpi
-          docker push $ACR_LOGIN_SERVER/glpi:latest
+          IMAGE_TAG=$BUILD_NUMBER
+          docker build -t $ACR_LOGIN_SERVER/glpi:$IMAGE_TAG -f glpi/Dockerfile ./glpi
+          docker push $ACR_LOGIN_SERVER/glpi:$IMAGE_TAG
 
 # -------------------------
   # Stage 2: Configure Cluster and Deploy
@@ -96,15 +99,18 @@ jobs:
         run: |
           kubectl apply -f ./helm-charts/cluster-issuer.yaml
 
-      # --- Deploy GLPI ---
       - name: Deploy GLPI with Helm
         env:
+          BUILD_NUMBER: ${{ github.run_number }}
           DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
           DB_USER_PASSWORD: ${{ secrets.DB_USER_PASSWORD }}
         run: |
-          helm upgrade --install "$HELM_RELEASE" ./helm-charts/glpi \
-            --namespace "$HELM_NAMESPACE" \
-            --create-namespace \
-            -f ./helm-charts/glpi/values-dev.yaml \
-            --set mariadb.rootPassword="$DB_ROOT_PASSWORD" \
-            --set mariadb.userPassword="$DB_USER_PASSWORD"
+         helm upgrade --install "$HELM_RELEASE" ./helm-charts/glpi \
+          --namespace "$HELM_NAMESPACE" \
+          --create-namespace \
+          -f ./helm-charts/glpi/values-dev.yaml \
+          --set image.repository=$ACR_LOGIN_SERVER/glpi \
+          --set image.tag=$BUILD_NUMBER \
+          --set mariadb.rootPassword="$DB_ROOT_PASSWORD" \
+          --set mariadb.userPassword="$DB_USER_PASSWORD"
+
