@@ -52,6 +52,9 @@ spec:
               mountPath: /var/glpi/files
             - name: glpi-config
               mountPath: /var/glpi/config
+            # Override image's CMD/USER so supervisord runs as root
+            command: ["/usr/bin/supervisord"]
+            args: ["-c", "/etc/supervisor/conf.d/supervisord.conf"]
   volumeClaimTemplates:
     - metadata:
         name: glpi-files
