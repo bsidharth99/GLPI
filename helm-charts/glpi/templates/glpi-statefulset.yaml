@@ -33,8 +33,6 @@ spec:
           mountPath: /var/glpi/config
         - name: glpi-marketplace
           mountPath: /var/glpi/marketplace
-        - name: glpi-logs
-          mountPath: /var/glpi/logs
       containers:
       - name: glpi
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
