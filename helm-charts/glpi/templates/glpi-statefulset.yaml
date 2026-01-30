@@ -16,6 +16,10 @@ spec:
       labels:
         app: glpi
     spec:
+      securityContext: 
+        runAsUser: 0 
+        runAsGroup: 0 
+        fsGroup: 33
       containers:
         - name: glpi
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -48,10 +52,6 @@ spec:
               mountPath: /var/glpi/files
             - name: glpi-config
               mountPath: /var/glpi/config
-          securityContext: 
-              runAsUser: 0 
-              runAsGroup: 0 
-              fsGroup: 33
   volumeClaimTemplates:
     - metadata:
         name: glpi-files
