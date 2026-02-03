@@ -67,6 +67,8 @@ spec:
           mountPath: /var/glpi/config
         - name: glpi-marketplace
           mountPath: /var/glpi/marketplace
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
   volumeClaimTemplates:
   - metadata:
       name: glpi-files
