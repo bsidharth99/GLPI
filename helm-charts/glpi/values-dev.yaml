@@ -1,7 +1,10 @@
 image:
-  repository: serviceone1.azurecr.io/glpi
+  repository: serviceone2.azurecr.io/glpi
   tag: latest
   pullPolicy: IfNotPresent
+
+imagePullSecrets: 
+ - name: acr-secret
 
 mariadb:
   image: mariadb
