@@ -1,13 +1,15 @@
 name: Build and Deploy GLPI + MariaDB to AKS (Helm + Traefik + cert-manager)
+
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "mai" ]
+
 jobs:
 
 # Stage 1: Build & Push Image
   # -------------------------
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment: dev
     env:
       ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
@@ -18,28 +20,26 @@ jobs:
       - name: Azure login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.AZURE_ACR_CREDENTIALS }}
 
       - name: ACR login
         uses: azure/docker-login@v1
         with:
-          login-server: ${{ vars.ACR_LOGIN_SERVER }}
-          username: ${{ vars.ACR_USERNAME }}
+          login-server: ${{ env.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
-          
+
       - name: Build and push GLPI image
-        env:
-         BUILD_NUMBER: ${{ github.run_number }}
         run: |
-          IMAGE_TAG=$BUILD_NUMBER
-          docker build -t $ACR_LOGIN_SERVER/glpi:$IMAGE_TAG -f glpi/Dockerfile ./glpi
-          docker push $ACR_LOGIN_SERVER/glpi:$IMAGE_TAG
+          docker build -t $ACR_LOGIN_SERVER/glpi:2026 -f glpi/Dockerfile ./glpi
+          docker push $ACR_LOGIN_SERVER/glpi:2026
+
 
 # -------------------------
   # Stage 2: Configure Cluster and Deploy
   # -------------------------
   Deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build
     environment: dev
     env:
@@ -52,7 +52,7 @@ jobs:
       - name: Azure login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.AZURE_AKS_CREDENTIALS }}
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
@@ -100,6 +100,17 @@ jobs:
         run: |
           kubectl apply -f ./helm-charts/cluster-issuer.yaml
 
+      - name: Create ACR pull secret
+        run: |
+          kubectl create secret docker-registry acr-secret \
+           --docker-server=$ACR_LOGIN_SERVER \
+           --docker-username=${{ secrets.ACR_USERNAME }} \
+           --docker-password=${{ secrets.ACR_PASSWORD }} \
+           --docker-email=unused@example.com \
+           --namespace $HELM_NAMESPACE \
+           --dry-run=client -o yaml | kubectl apply -f -
+
+
       - name: Deploy GLPI with Helm
         env:
           BUILD_NUMBER: ${{ github.run_number }}
@@ -111,7 +122,6 @@ jobs:
           --create-namespace \
           -f ./helm-charts/glpi/values-dev.yaml \
           --set image.repository=$ACR_LOGIN_SERVER/glpi \
-          --set image.tag=$BUILD_NUMBER \
+          --set image.tag=2026 \
           --set mariadb.rootPassword="$DB_ROOT_PASSWORD" \
           --set mariadb.userPassword="$DB_USER_PASSWORD"
-
