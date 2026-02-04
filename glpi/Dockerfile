@@ -109,6 +109,12 @@ RUN mkdir -p /usr/src/glpi/plugins \
     && rm /tmp/samlsso.tar.gz \
     && mv /usr/src/glpi/plugins/samlsso-1.2.5 /usr/src/glpi/plugins/samlsso
 
+# 2. Extract DonutsNL samlsso plugin into the source marketplace directory
+COPY --from=downloader /samlsso.tar.gz /tmp/samlsso.tar.gz
+RUN mkdir -p /usr/src/glpi/marketplace/samlsso \
+    && tar -xzf /tmp/samlsso.tar.gz --strip-components=1 -C /usr/src/glpi/marketplace/samlsso \
+    && rm /tmp/samlsso.tar.gz
+
 
 # 3. Set permissions
 RUN chown --recursive www-data:www-data /usr/src/glpi
