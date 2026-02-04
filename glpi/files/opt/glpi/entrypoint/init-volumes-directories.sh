@@ -30,20 +30,25 @@ all_dirs=("${roots[@]}" "${vars[@]}")
 
 for dir in "${all_dirs[@]}"
 do
-    if [ ! -d "$dir" ]; then
-        # 1. Get the folder name (e.g., 'marketplace')
+    # Check if directory doesn't exist OR is empty (ignoring lost+found)
+    if [ ! -d "$dir" ] || [ -z "$(ls -A "$dir" 2>/dev/null | grep -v "lost+found")" ]; then
+        
         folder_name=$(basename "$dir")
         
-        # 2. Check if the image has content for this folder (like your SAML plugin)
+        # Check if the image source actually has files to copy
         if [ -d "$SRC_ROOT/$folder_name" ] && [ "$(ls -A "$SRC_ROOT/$folder_name" 2>/dev/null)" ]; then
             echo "Initializing $dir from image source..."
             mkdir -p -- "$dir"
-            # Copy contents from image to the empty volume
             cp -rp "$SRC_ROOT/$folder_name/." "$dir/"
         else
-            echo "Creating empty $dir..."
-            mkdir -p -- "$dir"
+            # Only log "Creating" if it doesn't actually exist yet
+            if [ ! -d "$dir" ]; then
+                echo "Creating empty $dir..."
+                mkdir -p -- "$dir"
+            fi
         fi
+    else
+        echo "Directory $dir already exists and is not empty, skipping initialization."
     fi
 done
 
