@@ -1,4 +1,4 @@
-FROM glpi-project/glpi:11
+FROM glpi/glpi:11
 
 WORKDIR /var/www/html/glpi
 
