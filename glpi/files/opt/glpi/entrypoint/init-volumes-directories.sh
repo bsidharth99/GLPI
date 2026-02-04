@@ -1,9 +1,7 @@
 #!/bin/bash
 set -e -u -o pipefail
 
-# Define where the 'baked-in' source is in the image
-SRC_ROOT="/var/www/glpi"
-
+# Create `config`, `marketplace` and `files` volume (sub)directories that are missing
 roots=(
     "${GLPI_CONFIG_DIR}"
     "${GLPI_VAR_DIR}"
@@ -25,30 +23,14 @@ vars=(
     "${GLPI_VAR_DIR}/_uploads"
     "${GLPI_VAR_DIR}/_inventories"
 )
-
 all_dirs=("${roots[@]}" "${vars[@]}")
-
 for dir in "${all_dirs[@]}"
 do
-    # NEW LOGIC: Check if directory is missing OR exists but is empty
-    # (We ignore lost+found which is common on K8s volumes)
-    IS_EMPTY=$(ls -A "$dir" 2>/dev/null | grep -v "lost+found" | wc -l)
-
-    if [ ! -d "$dir" ] || [ "$IS_EMPTY" -eq 0 ]; then
-        folder_name=$(basename "$dir")
-        
-        if [ -d "$SRC_ROOT/$folder_name" ] && [ "$(ls -A "$SRC_ROOT/$folder_name" 2>/dev/null)" ]; then
-            echo "Empty mount detected. Initializing $dir from image source..."
-            mkdir -p -- "$dir"
-            cp -rp "$SRC_ROOT/$folder_name/." "$dir/"
-        else
-            [ ! -d "$dir" ] && echo "Creating empty $dir..." && mkdir -p -- "$dir"
-        fi
-    else
-        echo "Directory $dir already contains data, skipping sync."
+    if [ ! -d "$dir" ]; then
+        echo "Creating $dir..."
+        mkdir -p -- "$dir"
     fi
 done
-
 
 # Check permissions
 for dir in "${roots[@]}"
