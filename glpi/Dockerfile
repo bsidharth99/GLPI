@@ -23,7 +23,7 @@ FROM alpine AS downloader
 # - A branch name: e.g., "11.0/bugfixes", "main"
 # - A commit hash: e.g., "2186bc6bd410d8bcb048637b3c0fb86b7e320c0a"
 # - A direct URL: e.g., "https://github.com/glpi-project/glpi/archive/2186bc6.tar.gz"
-ARG GLPI_VERSION=11.0.0
+ARG GLPI_VERSION=latest
 # Cache-busting key for glpi workflows
 ARG GLPI_CACHE_KEY=""
  
