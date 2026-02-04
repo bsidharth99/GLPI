@@ -1,5 +1,5 @@
 # Start from the official GLPI image
-FROM glpi:11
+FROM glpi/glpi:11
 
 # Set working directory to GLPI root
 WORKDIR /var/www/html/glpi
