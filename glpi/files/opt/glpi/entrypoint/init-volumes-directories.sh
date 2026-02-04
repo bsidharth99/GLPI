@@ -41,3 +41,22 @@ do
         exit 1
     fi
 done
+
+# --------------------------------------------------
+# Seed marketplace plugins from image if missing
+# --------------------------------------------------
+
+IMAGE_MARKETPLACE="/var/www/glpi/marketplace"
+PVC_MARKETPLACE="${GLPI_MARKETPLACE_DIR}"
+
+if [ -d "$IMAGE_MARKETPLACE" ]; then
+    for plugin in "$IMAGE_MARKETPLACE"/*; do
+        plugin_name="$(basename "$plugin")"
+
+        if [ ! -d "$PVC_MARKETPLACE/$plugin_name" ]; then
+            echo "Seeding marketplace plugin: $plugin_name"
+            cp -R "$plugin" "$PVC_MARKETPLACE/"
+            chown -R "$(id -u):$(id -g)" "$PVC_MARKETPLACE/$plugin_name"
+        fi
+    done
+fi
