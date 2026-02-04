@@ -32,8 +32,8 @@ jobs:
 
       - name: Build and push GLPI image
         run: |
-          docker build -t $ACR_LOGIN_SERVER/glpi:2027 -f glpi/Dockerfile ./glpi
-          docker push $ACR_LOGIN_SERVER/glpi:2027
+          docker build -t $ACR_LOGIN_SERVER/glpi:2028 -f glpi/Dockerfile ./glpi
+          docker push $ACR_LOGIN_SERVER/glpi:2028
 
 
 # -------------------------
@@ -123,6 +123,6 @@ jobs:
           --create-namespace \
           -f ./helm-charts/glpi/values-dev.yaml \
           --set image.repository=$ACR_LOGIN_SERVER/glpi \
-          --set image.tag=2027 \
+          --set image.tag=2028 \
           --set mariadb.rootPassword="$DB_ROOT_PASSWORD" \
           --set mariadb.userPassword="$DB_USER_PASSWORD"
