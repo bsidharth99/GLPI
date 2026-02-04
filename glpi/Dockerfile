@@ -107,8 +107,7 @@ COPY --from=downloader /samlsso.tar.gz /tmp/samlsso.tar.gz
 RUN mkdir -p /usr/src/glpi/plugins \
     && tar -xzf /tmp/samlsso.tar.gz -C /usr/src/glpi/plugins \
     && rm /tmp/samlsso.tar.gz \
-    && ls -l /usr/src/glpi/plugins \
-    && mv /usr/src/glpi/plugins/samlsso-1.2.5 /usr/src/glpi/plugins/samlsso
+    && mv $(find /usr/src/glpi/plugins -mindepth 1 -maxdepth 1 -type d | head -n1) /usr/src/glpi/plugins/samlsso
 
 # 3. Set permissions
 RUN chown --recursive www-data:www-data /usr/src/glpi
