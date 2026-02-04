@@ -2,9 +2,8 @@ FROM glpi/glpi:11
 
 WORKDIR /var/www/html/glpi
 
-# Install required tools
-RUN apt-get update && apt-get install -y curl tar gzip \
-    && rm -rf /var/lib/apt/lists/*
+# Install required tools (Alpine package manager)
+RUN apk add --no-cache curl tar gzip
 
 # Download and extract plugin
 RUN mkdir -p /var/www/html/glpi/plugins/samlsso \
