@@ -30,27 +30,25 @@ all_dirs=("${roots[@]}" "${vars[@]}")
 
 for dir in "${all_dirs[@]}"
 do
-    # Check if directory doesn't exist OR is empty (ignoring lost+found)
-    if [ ! -d "$dir" ] || [ -z "$(ls -A "$dir" 2>/dev/null | grep -v "lost+found")" ]; then
-        
+    # NEW LOGIC: Check if directory is missing OR exists but is empty
+    # (We ignore lost+found which is common on K8s volumes)
+    IS_EMPTY=$(ls -A "$dir" 2>/dev/null | grep -v "lost+found" | wc -l)
+
+    if [ ! -d "$dir" ] || [ "$IS_EMPTY" -eq 0 ]; then
         folder_name=$(basename "$dir")
         
-        # Check if the image source actually has files to copy
         if [ -d "$SRC_ROOT/$folder_name" ] && [ "$(ls -A "$SRC_ROOT/$folder_name" 2>/dev/null)" ]; then
-            echo "Initializing $dir from image source..."
+            echo "Empty mount detected. Initializing $dir from image source..."
             mkdir -p -- "$dir"
             cp -rp "$SRC_ROOT/$folder_name/." "$dir/"
         else
-            # Only log "Creating" if it doesn't actually exist yet
-            if [ ! -d "$dir" ]; then
-                echo "Creating empty $dir..."
-                mkdir -p -- "$dir"
-            fi
+            [ ! -d "$dir" ] && echo "Creating empty $dir..." && mkdir -p -- "$dir"
         fi
     else
-        echo "Directory $dir already exists and is not empty, skipping initialization."
+        echo "Directory $dir already contains data, skipping sync."
     fi
 done
+
 
 # Check permissions
 for dir in "${roots[@]}"
