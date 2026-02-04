@@ -241,6 +241,9 @@ RUN a2enconf zzz-glpi.conf
  
 # Copy GLPI application.
 COPY --from=builder --chown=www-data:www-data /usr/src/glpi /var/www/glpi
+
+COPY --from=builder --chown=www-data:www-data /usr/src/glpi/marketplace /var/www/glpi/marketplace
+
  
 # Declare a volume for "config", "marketplace" and "files" directory
 RUN mkdir /var/glpi && chown www-data:www-data /var/glpi
