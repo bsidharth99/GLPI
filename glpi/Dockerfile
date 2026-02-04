@@ -23,7 +23,7 @@ FROM alpine AS downloader
 # - A branch name: e.g., "11.0/bugfixes", "main"
 # - A commit hash: e.g., "2186bc6bd410d8bcb048637b3c0fb86b7e320c0a"
 # - A direct URL: e.g., "https://github.com/glpi-project/glpi/archive/2186bc6.tar.gz"
-ARG GLPI_VERSION=latest
+ARG GLPI_VERSION=11.0.0
 # Cache-busting key for glpi workflows
 ARG GLPI_CACHE_KEY=""
 
@@ -47,6 +47,10 @@ RUN set -ex; \
     echo "Downloading GLPI from $URL"; \
     curl --location "$URL" --output /glpi.tar.gz
 
+# --- Download DonutsNL samlsso Plugin --- 
+RUN curl -L "https://github.com/DonutsNL/samlsso/archive/refs/tags/v1.2.5.tar.gz" -o /samlsso.tar.gz
+
+
 #####
 # Builder image
 #####
@@ -55,6 +59,12 @@ FROM $BUILDER_IMAGE AS builder
 # Copy composer binary from latest composer image.
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Added bzip2 for SAML extraction
+RUN apk update && apk add --no-cache \
+    bash patch bzip2 gettext perl nodejs npm git unzip curl icu-dev \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install intl
+    
 # Install required system packages.
 RUN \
   # Update APK package list.
@@ -86,12 +96,23 @@ RUN \
  # Update PHP configuration.
 RUN echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/docker-php-memory.ini
 
-# Copy tarball from downloader and extract (preserves permissions from archive)
+# 1. Extract GLPI Core
 COPY --from=downloader /glpi.tar.gz /tmp/glpi.tar.gz
 RUN mkdir --parents /usr/src/glpi \
-    && tar --extract --gzip --file=/tmp/glpi.tar.gz --strip-components=1 --directory=/usr/src/glpi \
-    && rm /tmp/glpi.tar.gz \
-    && chown --recursive www-data:www-data /usr/src/glpi
+    && tar -xzf /tmp/glpi.tar.gz --strip-components=1 -C /usr/src/glpi \
+    && rm /tmp/glpi.tar.gz
+
+# 2. Extract DonutsNL samlsso plugin
+COPY --from=downloader /samlsso.tar.gz /tmp/samlsso.tar.gz
+RUN mkdir -p /usr/src/glpi/plugins \
+    && tar -xzf /tmp/samlsso.tar.gz -C /usr/src/glpi/plugins \
+    && rm /tmp/samlsso.tar.gz \
+    && ls -l /usr/src/glpi/plugins \
+    && mv /usr/src/glpi/plugins/samlsso-1.2.5 /usr/src/glpi/plugins/samlsso
+
+# 3. Set permissions
+RUN chown --recursive www-data:www-data /usr/src/glpi
+
 
 # Optional patch URL to apply after download
 ARG GLPI_PATCH_URL=""
@@ -208,6 +229,7 @@ COPY ./files/etc/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.
 COPY ./files/etc/php/conf.d/glpi.ini $PHP_INI_DIR/conf.d/glpi.ini
 COPY ./files/opt/glpi/ /opt/glpi/
 RUN find /opt/glpi -type f -iname "*.sh" -exec chmod +x {} \;
+
 
 # Enable custom Apache configuration
 RUN a2enconf zzz-glpi.conf
