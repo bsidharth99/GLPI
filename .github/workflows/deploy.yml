@@ -77,14 +77,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # --- Install Traefik ---
+
+    # --- Install Traefik ---
       - name: Install Traefik Ingress Controller
         run: |
-          helm repo add traefik https://traefik.github.io/charts
-          helm repo update
-          helm upgrade --install traefik traefik/traefik \
-            --namespace traefik \
-            --create-namespace
+           helm repo add traefik https://traefik.github.io/charts
+           helm repo update
+           helm upgrade --install traefik traefik/traefik \
+              --namespace traefik \
+              --create-namespace \
+              --set additionalArguments[0]="--entrypoints.web.http.redirections.entryPoint.to=websecure" \
+              --set additionalArguments[1]="--entrypoints.web.http.redirections.entryPoint.scheme=https"
+
 
       # --- Install cert-manager ---
       - name: Install cert-manager
