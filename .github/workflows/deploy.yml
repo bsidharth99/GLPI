@@ -81,13 +81,15 @@ jobs:
     # --- Install Traefik ---
       - name: Install Traefik Ingress Controller
         run: |
-           helm repo add traefik https://traefik.github.io/charts
-           helm repo update
-           helm upgrade --install traefik traefik/traefik \
-              --namespace traefik \
-              --create-namespace \
-              --set additionalArguments[0]="--entrypoints.web.http.redirections.entryPoint.to=websecure" \
-              --set additionalArguments[1]="--entrypoints.web.http.redirections.entryPoint.scheme=https"
+         helm repo add traefik https://traefik.github.io/charts
+         helm repo update
+         helm upgrade --install traefik traefik/traefik \
+           --namespace traefik \
+           --create-namespace \
+           --set additionalArguments[0]="--entrypoints.web.http.redirections.entryPoint.to=websecure" \
+           --set additionalArguments[1]="--entrypoints.web.http.redirections.entryPoint.scheme=https" \
+           --set additionalArguments[2]="--entrypoints.websecure.address=:443"
+
 
 
       # --- Install cert-manager ---
