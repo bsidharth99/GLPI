@@ -242,7 +242,8 @@ RUN a2enconf zzz-glpi.conf
 # Copy GLPI application.
 COPY --from=builder --chown=www-data:www-data /usr/src/glpi /var/www/glpi
 
-COPY --chown=www-data:www-data ./Awan_logo.png /var/www/glpi/pics/Awan_logo.png
+# Copy the logo into the PUBLIC pics directory
+COPY --chown=www-data:www-data ./Awan_logo.png /var/www/glpi/public/pics/Awan_logo.png
 
 COPY --from=builder --chown=www-data:www-data /usr/src/glpi/marketplace /var/www/glpi/marketplace
 
