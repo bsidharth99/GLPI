@@ -1,5 +1,5 @@
 image:
-  repository: serviceone2.azurecr.io/glpi
+  repository: glpi/glpi
   tag: latest
   pullPolicy: IfNotPresent
 
