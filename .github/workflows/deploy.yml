@@ -55,11 +55,7 @@ jobs:
          helm repo update
          helm upgrade --install traefik traefik/traefik \
            --namespace traefik \
-           --create-namespace \
-           --set additionalArguments[0]="--entrypoints.web.http.redirections.entryPoint.to=websecure" \
-           --set additionalArguments[1]="--entrypoints.web.http.redirections.entryPoint.scheme=https" \
-           --set additionalArguments[2]="--entrypoints.websecure.address=:443" 
-
+           --create-namespace 
 
 
       # --- Install cert-manager ---
