@@ -58,8 +58,7 @@ jobs:
            --create-namespace \
            --set additionalArguments[0]="--entrypoints.web.http.redirections.entryPoint.to=websecure" \
            --set additionalArguments[1]="--entrypoints.web.http.redirections.entryPoint.scheme=https" \
-           --set additionalArguments[2]="--entrypoints.websecure.address=:443" \
-           --set additionalArguments[3]="--entrypoints.web.http.redirections.entrypoint.port=443"
+           --set additionalArguments[2]="--entrypoints.websecure.address=:443" 
 
 
 
