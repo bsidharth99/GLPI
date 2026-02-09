@@ -54,8 +54,12 @@ jobs:
          helm repo add traefik https://traefik.github.io/charts
          helm repo update
          helm upgrade --install traefik traefik/traefik \
-           --namespace traefik \
-           --create-namespace 
+              --namespace traefik \
+              --create-namespace \
+              --set ports.web.redirections.entryPoint.to=websecure \
+              --set ports.web.redirections.entryPoint.scheme=https \
+              --set ports.websecure.port=8443 \
+              --set ports.websecure.exposedPort=443
 
 
       # --- Install cert-manager ---
