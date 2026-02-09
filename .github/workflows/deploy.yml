@@ -89,6 +89,5 @@ jobs:
           --namespace "$HELM_NAMESPACE" \
           --create-namespace \
           -f ./helm-charts/glpi/values-dev.yaml \
-          --set image.tag=latest
           --set mariadb.rootPassword="$DB_ROOT_PASSWORD" \
           --set mariadb.userPassword="$DB_USER_PASSWORD"
